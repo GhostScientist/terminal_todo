@@ -2,39 +2,100 @@
 # This first iteration is merely a self-containing to-do program.
 # Once the program ends, all information is lost.
 
+# Created by Dakota Kim.
+
 import sys
+import sqlite3
+import os
+import time
 
 
 def run():
-    print("Hello there! What would you like to do?")
-    print("Enter the corresponding code for what you'd like to do!")
-    print("list: Entering 'list' will print out the contents of the to-do list!")
-    print("add: Entering 'add' will allow you to enter another task.")
-    print("finish: Entering 'finish' will complete one of the items.")
-    print("exit: this will close the program")
+    print("(Hi there, if at anytime you'd like to quit this program, enter 'EXIT' into any input field)")
+    response = raw_input("Hello! Is this your first time creating a to-do list in the terminal?\t")
+    # If this is first time, will run the createDB method to create a database to store tasks.
+    if response.lower() == "yes":
+        createDB()
+    elif response.lower() == "no":
+        choice_maker()
+    elif response.lower() == "create":
+        creator()
+    elif choice.upper() == "EXIT":
+        sys.exit()
 
-    desire = raw_input("So what do you want to do?   ")
+def createDB():
+    pwd = os.getcwd() ## Returns the current directory. I'll add some customization to this section later.
+    print("Awesome! Let's get started")
+    print("Your current directory is " + pwd)
+    print("Keep track of this path! Your database will be created here!")
+    sql_file = pwd + "/my_todo.db"
+    connection = sqlite3.connect(sql_file)
+    c = connection.cursor()
+    # We have connected a database file. If file doesn't already exist, this connection
+    # will create it. The next step is to create a table.
+    c.execute('''CREATE TABLE tasks(TEXT task, INTEGER importance)''')
+    # Eventually I would like to have a way for users to sort by what is due soonest.
+    # Perhaps a MM/DD/YYYY implementation. I'll do some research into that. :)
 
-    if desire == "list":
-        list()
-    elif desire == "add":
-        add()
-    elif desire == "finish":
-        finish()
-    elif desire == "exit":
-        exit()
+def choice_maker():
+    # The manager method will allow the user to control the contents of their to-do list.
+    # The user will select a number that corresponds to their desire. I will implement
+    # a tracking system for the user to keep track of how many tasks they've completed
+    # and which ones! I will also implement a sorting method for users to decide which
+    # criteria they'd like to sort by. :)
+    print("""What would you like to do?
+                       1 = Add a new task
+                       2 = Complete a task
+                       3 = Remove a task
+                       4 = List all tasks
+                       5 = Sort tasks!""")
+    choice = raw_input("Enter the number that corresponds to your choice!    ")
+    if (choice.isdigit()):
+        if choice == "1":
+            print("You chose 1!")
+            sys.exit()
+        elif choice == "2":
+            print("You chose 2!")
+            sys.exit()
+        elif choice == "3":
+            print("You chose 3!")
+            sys.exit()
+        elif choice == "4":
+            print("You chose 4!")
+            sys.exit()
+        elif choice == "5":
+            print("You chose 5!")
+            sys.exit()
+        elif choice.upper() == "EXIT":
+            sys.exit()
+        else:
+            print ("You didn't enter a valid choice! Select a choice ranging from 1 to 5!")
+            choice_maker()
+    else:
+        print("You didn't enter a valid number. :( No problem! We can start all over again! :D")
+        choice_maker()
 
-def list():
-    print("placeholder")
-    run()
+def creator():
+    print("""In order to create a new task, we will need a name for the task and an integer
+            ranging from 1 to 10 that rates its importance to you. I'll be checking to ensure
+            your input is formatted correctly, so don't worry! :)""")
+    task = raw_input("What would you like to add to your list?")
+    rating = raw_input("Rate this tasks importance from 1 to 10!")
+    sql_command = "INSERT INTO tasks VALUES "
+    values = "('" + task + "', " + rating + ")"
+    final_command = sql_command + values
+    double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating)
+    if double_check.lower() == "yes":
+        c.execute(final_command) # Adds the desired task and rating into the table.
+    else:
+        print("That's okay, let's start over! :)")
+        creator()
+#def compete():
 
-def add():
-    print ("placeholder")
-    run()
+#def remove():
 
-def finish():
-    print ("placeholder")
-    run()
+#def list():
 
+#def sort():
 
 run()
