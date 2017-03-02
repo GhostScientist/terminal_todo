@@ -10,6 +10,9 @@ import os
 import time
 
 
+pwd = os.getcwd() # Returns the current directory. I'll add some customization to this section later.
+sql_file = pwd + "/my_todo.db"
+
 def run():
     print("(Hi there, if at anytime you'd like to quit this program, enter 'EXIT' into any input field)")
     time.sleep(1.0) # This program will use a lot of sleeping so the user isn't bombarded with information.
@@ -25,7 +28,6 @@ def run():
         sys.exit()
 
 def createDB():
-    pwd = os.getcwd() ## Returns the current directory. I'll add some customization to this section later.
     print("Awesome! Let's get started")
     time.sleep(0.5)
     print("Your current directory is " + pwd)
@@ -36,9 +38,11 @@ def createDB():
     c = connection.cursor()
     # We have connected a database file. If file doesn't already exist, this connection
     # will create it. The next step is to create a table.
-    c.execute('''CREATE TABLE tasks(TEXT task, INTEGER importance)''')
+    c.execute('''CREATE TABLE tasks(TEXT TASK, INTEGER IMPORTANCE)''')
     # Eventually I would like to have a way for users to sort by what is due soonest.
     # Perhaps a MM/DD/YYYY implementation. I'll do some research into that. :)
+    connection.commit()
+    connection.close()
 
 def choice_maker():
     # The manager method will allow the user to control the contents of their to-do list.
@@ -49,9 +53,8 @@ def choice_maker():
     print("""What would you like to do?
                        1 = Add a new task
                        2 = Complete a task
-                       3 = Remove a task
-                       4 = List all tasks
-                       5 = Sort tasks!""")
+                       3 = List all tasks
+                       4 = Sort tasks!""")
     time.sleep(1.0)
     choice = raw_input("Enter the number that corresponds to your choice!    ")
     if (choice.isdigit()):
@@ -67,9 +70,6 @@ def choice_maker():
         elif choice == "4":
             print("You chose 4!")
             sys.exit()
-        elif choice == "5":
-            print("You chose 5!")
-            sys.exit()
         elif choice.upper() == "EXIT":
             sys.exit()
         else:
@@ -80,6 +80,8 @@ def choice_maker():
         choice_maker()
 
 def creator(): # Method used to create new tasks for the list.
+    connection = sqlite3.connect(sql_file)
+    c = connect.cursor()
     print("""In order to create a new task, we will need a name for the task and an integer
             ranging from 1 to 10 that rates its importance to you. I'll be checking to ensure
             your input is formatted correctly, so don't worry! :)""")
@@ -88,23 +90,53 @@ def creator(): # Method used to create new tasks for the list.
     time.sleep(0.5)
     rating = raw_input("Rate this tasks importance from 1 to 10!    ")
     sql_command = "INSERT INTO tasks VALUES "
-    values = "('" + task + "', " + rating + ")"
+    values = "('" + task.lower() + "', " + rating + ")"
     final_command = sql_command + values
     time.sleep(0.5)
     double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating)
     if double_check.lower() == "yes":
         c.execute(final_command) # Adds the desired task and rating into the table.
-        c.commit()
+        connection.commit()
+        connection.close()
     else:
         print("That's okay, let's start over! :)")
         creator()
 
-#def compete(): This method will complete a task and add that task to list of completed tasks
+def complete(): #This method will complete a task and add that task to list of completed tasks
+    connection = sqlite3.connect(sql_file)
+    c = connection.cursor()
+    print("Good job! Being productive is great!")
+    reprint = raw_input("Should I re-print the to-do list?")
+    if reprint.lower() == "yes":
+        c.execute('SELECT * FROM tasks')
+    time.sleep(1.5)
+    bool = True
+    while (bool == True):
+        completedTask = raw_input("Enter the name of task would you like to complete?")
+        c.execute('SELECT * FROM tasks WHERE TASK = ?', completedTask)
+        connection.commit()
+        bool = False
+        repeat = raw_input("Want to complete another task?")
+        if repeat.lower() == "yes":
+            bool = True
+        else:
+            connection.close()
 
-#def remove():
+def list():
+    connection = sqlite3.connect(sql_file)
+    c = connection.cursor()
+    c.execute('SELECT * FROM tasks')
+    connection.close()
 
-#def list():
-
-#def sort():
+def sort():
+    connection = sqlite3.connect(sql_file)
+    c = connection.cursor()
+    print("Would you like to sort by task name or importance of task?")
+    importanceOrTask = raw_input("Enter A for task name and B for importance")
+    if (importanceOrTask.lower() == "a"):
+        c.execute('SELECT * FROM tasks ORDER BY TASK ASC')
+    elif (importanceOrTask.lower() == "b"):
+        c.execute('SELECT * FROM tasks ORDER BY IMPORTANCE DESC')
+    connection.close()
 
 run()
