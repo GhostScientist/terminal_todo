@@ -8,7 +8,7 @@ import sys
 import sqlite3
 import os
 import time
-
+from itertools import chain
 
 pwd = os.getcwd() # Returns the current directory. I'll add some customization to this section later.
 sql_file = pwd + "/my_todo.db"
@@ -35,14 +35,17 @@ def createDB():
     print("Keep track of this path! Your database will be created here!")
     sql_file = pwd + "/my_todo.db"
     connection = sqlite3.connect(sql_file)
+    connection.text_factory = str
     c = connection.cursor()
     # We have connected a database file. If file doesn't already exist, this connection
     # will create it. The next step is to create a table.
-    c.execute('''CREATE TABLE tasks(TEXT TASK, INTEGER IMPORTANCE)''')
+    c.execute('''CREATE TABLE tasks(task TEXT, importance INTEGER)''')
     # Eventually I would like to have a way for users to sort by what is due soonest.
     # Perhaps a MM/DD/YYYY implementation. I'll do some research into that. :)
     connection.commit()
     connection.close()
+    if raw_input("Want to add a task?\t").lower() == "yes":
+        creator()
 
 def choice_maker():
     # The manager method will allow the user to control the contents of their to-do list.
@@ -56,21 +59,21 @@ def choice_maker():
                        3 = List all tasks
                        4 = Sort tasks!""")
     time.sleep(1.0)
-    choice = raw_input("Enter the number that corresponds to your choice!    ")
+    choice = raw_input("Enter the number that corresponds to your choice!\t")
     if (choice.isdigit()):
         if choice == "1":
-            print("You chose 1!")
+            creator()
             sys.exit()
         elif choice == "2":
-            print("You chose 2!")
+            complete()
             sys.exit()
         elif choice == "3":
-            print("You chose 3!")
+            list()
             sys.exit()
         elif choice == "4":
-            print("You chose 4!")
+            sort()
             sys.exit()
-        elif choice.upper() == "EXIT":
+        elif choice == "EXIT":
             sys.exit()
         else:
             print ("You didn't enter a valid choice! Select a choice ranging from 1 to 5!")
@@ -81,42 +84,53 @@ def choice_maker():
 
 def creator(): # Method used to create new tasks for the list.
     connection = sqlite3.connect(sql_file)
-    c = connect.cursor()
+    connection.text_factory = str
+    c = connection.cursor()
     print("""In order to create a new task, we will need a name for the task and an integer
             ranging from 1 to 10 that rates its importance to you. I'll be checking to ensure
             your input is formatted correctly, so don't worry! :)""")
     time.sleep(1.0)
-    task = raw_input("What would you like to add to your list?  ")
+    task = raw_input("What would you like to add to your list?\t")
     time.sleep(0.5)
-    rating = raw_input("Rate this tasks importance from 1 to 10!    ")
+    rating = raw_input("Rate this tasks importance from 1 to 10!\t")
     sql_command = "INSERT INTO tasks VALUES "
     values = "('" + task.lower() + "', " + rating + ")"
     final_command = sql_command + values
     time.sleep(0.5)
-    double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating)
+    double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating + "\t")
     if double_check.lower() == "yes":
         c.execute(final_command) # Adds the desired task and rating into the table.
         connection.commit()
         connection.close()
+        if (raw_input("Want to add another task?").lower() == "yes"):
+            creator()
+        else:
+            choice_maker()
     else:
         print("That's okay, let's start over! :)")
         creator()
 
 def complete(): #This method will complete a task and add that task to list of completed tasks
     connection = sqlite3.connect(sql_file)
+    connection.text_factory = str
     c = connection.cursor()
     print("Good job! Being productive is great!")
-    reprint = raw_input("Should I re-print the to-do list?")
+    reprint = raw_input("Should I re-print the to-do list?\t")
     if reprint.lower() == "yes":
         c.execute('SELECT * FROM tasks')
+        realList = c.fetchall()
+        dicto = dict(realList)
+        for key,val in dicto.items():
+            print key, ":", val
     time.sleep(1.5)
     bool = True
     while (bool == True):
-        completedTask = raw_input("Enter the name of task would you like to complete?")
-        c.execute('SELECT * FROM tasks WHERE TASK = ?', completedTask)
+        completedTask = raw_input("Enter the name of task would you like to complete?\t")
+        print (completedTask)
+        c.execute("DELETE FROM tasks WHERE task=?", (completedTask,))
         connection.commit()
         bool = False
-        repeat = raw_input("Want to complete another task?")
+        repeat = raw_input("Want to complete another task?\t")
         if repeat.lower() == "yes":
             bool = True
         else:
@@ -124,19 +138,29 @@ def complete(): #This method will complete a task and add that task to list of c
 
 def list():
     connection = sqlite3.connect(sql_file)
+    connection.text_factory = str
     c = connection.cursor()
     c.execute('SELECT * FROM tasks')
+    realList = c.fetchall()
+    dicto = dict(realList)
+    for key,val in dicto.items():
+        print key, ":", val
     connection.close()
 
 def sort():
     connection = sqlite3.connect(sql_file)
+    connection.text_factory = str
     c = connection.cursor()
     print("Would you like to sort by task name or importance of task?")
-    importanceOrTask = raw_input("Enter A for task name and B for importance")
+    time.sleep(0.5)
+    importanceOrTask = raw_input("Enter A for task name and B for importance\t")
     if (importanceOrTask.lower() == "a"):
-        c.execute('SELECT * FROM tasks ORDER BY TASK ASC')
+        for row in c.execute("SELECT * FROM tasks ORDER BY task ASC"):
+            print row
+        connection.close()
     elif (importanceOrTask.lower() == "b"):
-        c.execute('SELECT * FROM tasks ORDER BY IMPORTANCE DESC')
-    connection.close()
+        for row in c.execute("SELECT * FROM tasks ORDER BY importance DESC"):
+            print row
+        connection.close()
 
 run()
