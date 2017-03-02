@@ -94,6 +94,7 @@ def creator(): # Method used to create new tasks for the list.
     double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating)
     if double_check.lower() == "yes":
         c.execute(final_command) # Adds the desired task and rating into the table.
+        c.commit()
     else:
         print("That's okay, let's start over! :)")
         creator()
