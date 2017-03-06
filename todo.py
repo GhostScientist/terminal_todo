@@ -14,18 +14,12 @@ pwd = os.getcwd() # Returns the current directory. I'll add some customization t
 sql_file = pwd + "/my_todo.db"
 
 def run():
-    print("(Hi there, if at anytime you'd like to quit this program, enter 'EXIT' into any input field)")
-    time.sleep(1.0) # This program will use a lot of sleeping so the user isn't bombarded with information.
     response = raw_input("Hello! Is this your first time creating a to-do list in the terminal?\t")
     # If this is first time, will run the createDB method to create a database to store tasks.
     if response.lower() == "yes":
         createDB()
     elif response.lower() == "no":
         choice_maker()
-    elif response.lower() == "create":
-        creator()
-    elif choice.upper() == "EXIT":
-        sys.exit()
 
 def createDB():
     print("Awesome! Let's get started")
@@ -46,6 +40,8 @@ def createDB():
     connection.close()
     if raw_input("Want to add a task?\t").lower() == "yes":
         creator()
+    else:
+        choice_maker()
 
 def choice_maker():
     # The manager method will allow the user to control the contents of their to-do list.
@@ -57,23 +53,20 @@ def choice_maker():
                        1 = Add a new task
                        2 = Complete a task
                        3 = List all tasks
-                       4 = Sort tasks!""")
+                       4 = Sort tasks!
+                       5 = Leave program""")
     time.sleep(1.0)
     choice = raw_input("Enter the number that corresponds to your choice!\t")
     if (choice.isdigit()):
         if choice == "1":
             creator()
-            sys.exit()
         elif choice == "2":
             complete()
-            sys.exit()
         elif choice == "3":
             list()
-            sys.exit()
         elif choice == "4":
             sort()
-            sys.exit()
-        elif choice == "EXIT":
+        elif choice == "5":
             sys.exit()
         else:
             print ("You didn't enter a valid choice! Select a choice ranging from 1 to 5!")
@@ -135,6 +128,7 @@ def complete(): #This method will complete a task and add that task to list of c
             bool = True
         else:
             connection.close()
+            choice_maker()
 
 def list():
     connection = sqlite3.connect(sql_file)
@@ -145,7 +139,10 @@ def list():
     dicto = dict(realList)
     for key,val in dicto.items():
         print key, ":", val
-    connection.close()
+    if (raw_input("Would you like to do something else?").lower() == "yes"):
+        choice_maker()
+    else:
+        connection.close()
 
 def sort():
     connection = sqlite3.connect(sql_file)
@@ -157,10 +154,19 @@ def sort():
     if (importanceOrTask.lower() == "a"):
         for row in c.execute("SELECT * FROM tasks ORDER BY task ASC"):
             print row
+        if (raw_input("Would you like to do something else?").lower() == "yes"):
+            choice_maker()
+        else:
+            sys.exit()
+            connection.close()
         connection.close()
     elif (importanceOrTask.lower() == "b"):
         for row in c.execute("SELECT * FROM tasks ORDER BY importance DESC"):
             print row
-        connection.close()
-
+        if (raw_input("Would you like to do something else?").lower() == "yes"):
+            choice_maker()
+        else:
+            sys.exit()
+            connection.close()
+            
 run()
