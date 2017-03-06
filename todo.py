@@ -21,7 +21,7 @@ def run():
     elif response.lower() == "no":
         choice_maker()
 
-def createDB():
+def createDB(): # Will add a try-catch clause to prevent sqlite3.OperationalError
     print("Awesome! Let's get started")
     time.sleep(0.5)
     print("Your current directory is " + pwd)
@@ -83,14 +83,14 @@ def creator(): # Method used to create new tasks for the list.
             ranging from 1 to 10 that rates its importance to you. I'll be checking to ensure
             your input is formatted correctly, so don't worry! :)""")
     time.sleep(1.0)
-    task = raw_input("What would you like to add to your list?\t")
+    task = raw_input("What would you like to add to your list?   ")
     time.sleep(0.5)
-    rating = raw_input("Rate this tasks importance from 1 to 10!\t")
+    rating = raw_input("Rate this tasks importance from 1 to 10!   ")
     sql_command = "INSERT INTO tasks VALUES "
     values = "('" + task.lower() + "', " + rating + ")"
     final_command = sql_command + values
     time.sleep(0.5)
-    double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating + "\t")
+    double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating + "?   ")
     if double_check.lower() == "yes":
         c.execute(final_command) # Adds the desired task and rating into the table.
         connection.commit()
@@ -108,7 +108,7 @@ def complete(): #This method will complete a task and add that task to list of c
     connection.text_factory = str
     c = connection.cursor()
     print("Good job! Being productive is great!")
-    reprint = raw_input("Should I re-print the to-do list?\t")
+    reprint = raw_input("Should I re-print the to-do list?   ")
     if reprint.lower() == "yes":
         c.execute('SELECT * FROM tasks')
         realList = c.fetchall()
@@ -118,12 +118,12 @@ def complete(): #This method will complete a task and add that task to list of c
     time.sleep(1.5)
     bool = True
     while (bool == True):
-        completedTask = raw_input("Enter the name of task would you like to complete?\t")
+        completedTask = raw_input("Enter the name of task would you like to complete?   ")
         print (completedTask)
         c.execute("DELETE FROM tasks WHERE task=?", (completedTask,))
         connection.commit()
         bool = False
-        repeat = raw_input("Want to complete another task?\t")
+        repeat = raw_input("Want to complete another task?   ")
         if repeat.lower() == "yes":
             bool = True
         else:
@@ -139,7 +139,7 @@ def list():
     dicto = dict(realList)
     for key,val in dicto.items():
         print key, ":", val
-    if (raw_input("Would you like to do something else?").lower() == "yes"):
+    if (raw_input("Would you like to do something else?   ").lower() == "yes"):
         choice_maker()
     else:
         connection.close()
@@ -150,11 +150,11 @@ def sort():
     c = connection.cursor()
     print("Would you like to sort by task name or importance of task?")
     time.sleep(0.5)
-    importanceOrTask = raw_input("Enter A for task name and B for importance\t")
+    importanceOrTask = raw_input("Enter A for task name and B for importance   ")
     if (importanceOrTask.lower() == "a"):
         for row in c.execute("SELECT * FROM tasks ORDER BY task ASC"):
             print row
-        if (raw_input("Would you like to do something else?").lower() == "yes"):
+        if (raw_input("Would you like to do something else?   ").lower() == "yes"):
             choice_maker()
         else:
             sys.exit()
@@ -163,10 +163,10 @@ def sort():
     elif (importanceOrTask.lower() == "b"):
         for row in c.execute("SELECT * FROM tasks ORDER BY importance DESC"):
             print row
-        if (raw_input("Would you like to do something else?").lower() == "yes"):
+        if (raw_input("Would you like to do something else?   ").lower() == "yes"):
             choice_maker()
         else:
             sys.exit()
             connection.close()
-            
+
 run()
