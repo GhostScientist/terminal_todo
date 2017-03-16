@@ -93,6 +93,7 @@ def creator(): # Method used to create new tasks for the list.
     double_check = raw_input("Just to be safe, is this what you'd like to add?: Task is '" + task + "' and rating is " + rating + "?   ")
     if double_check.lower() == "yes":
         c.execute(final_command) # Adds the desired task and rating into the table.
+        os.system('reset')
         connection.commit()
         connection.close()
         if (raw_input("Want to add another task?").lower() == "yes"):
@@ -123,6 +124,7 @@ def complete(): #This method will complete a task and add that task to list of c
         c.execute("DELETE FROM tasks WHERE task=?", (completedTask,))
         connection.commit()
         bool = False
+        os.system('reset')
         repeat = raw_input("Want to complete another task?   ")
         if repeat.lower() == "yes":
             bool = True
@@ -140,6 +142,7 @@ def list():
     for key,val in dicto.items():
         print key, ":", val
     if (raw_input("Would you like to do something else?   ").lower() == "yes"):
+        os.system('reset')
         choice_maker()
     else:
         connection.close()
@@ -155,6 +158,7 @@ def sort():
         for row in c.execute("SELECT * FROM tasks ORDER BY task ASC"):
             print row
         if (raw_input("Would you like to do something else?   ").lower() == "yes"):
+            os.system('reset')
             choice_maker()
         else:
             sys.exit()
@@ -164,6 +168,7 @@ def sort():
         for row in c.execute("SELECT * FROM tasks ORDER BY importance DESC"):
             print row
         if (raw_input("Would you like to do something else?   ").lower() == "yes"):
+            os.system('reset')
             choice_maker()
         else:
             sys.exit()
